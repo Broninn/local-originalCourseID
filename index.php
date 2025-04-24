@@ -16,16 +16,24 @@ echo $OUTPUT->header();
 
 $original = $DB->get_field('course', 'originalcourseid', ['id' => $courseid]);
 
-if ($original !== false) {
-    $originalurl = new moodle_url('/course/view.php', ['id' => $original]);
-    $link = html_writer::link(
-        $originalurl,
-        "Acessar curso original (ID: $original)",
-        ['class' => 'btn btn-outline-primary', 'target' => '_blank', 'rel' => 'noopener']
-    );
-    echo html_writer::div($link, 'alert alert-info');
+if (!empty($original)) {
+    // Verifica se o ID existe mesmo no banco
+    $courseexists = $DB->record_exists('course', ['id' => $original]);
+
+    if ($courseexists) {
+        $originalurl = new moodle_url('/course/view.php', ['id' => $original]);
+        $link = html_writer::link(
+            $originalurl,
+            "Acessar curso original (ID: $original)",
+            ['class' => 'btn btn-outline-primary', 'target' => '_blank', 'rel' => 'noopener']
+        );
+        echo html_writer::div($link, 'alert alert-info');
+    } else {
+        echo html_writer::div("O curso original com ID <strong>$original</strong> não foi encontrado.", 'alert alert-warning');
+    }
+
 } else {
-    echo html_writer::div("Campo originalcourseid não encontrado ou vazio.", 'alert alert-warning');
+    echo html_writer::div("Este curso não possui um valor definido para <code>originalcourseid</code>.", 'alert alert-secondary');
 }
 
 
